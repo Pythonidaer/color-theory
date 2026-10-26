@@ -37,6 +37,24 @@
         grid-row: 2 / 24;
         background: #ffffff;
       }
+      .frame-edge {
+        position: absolute;
+        background: #333333;
+        pointer-events: none;
+      }
+      .frame-top, .frame-bottom {
+        left: 25%;
+        right: 0;
+        height: calc(100% / 24);
+      }
+      .frame-top { top: 0; }
+      .frame-bottom { bottom: 0; }
+      .frame-right {
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: calc(100% / 24);
+      }
       .coordinate-grid {
         position: absolute;
         inset: 0;
@@ -107,6 +125,9 @@
       </aside>
       <main class="workspace" aria-label="Color workspace"></main>
     </div>
+    <div class="frame-edge frame-top" aria-hidden="true"></div>
+    <div class="frame-edge frame-right" aria-hidden="true"></div>
+    <div class="frame-edge frame-bottom" aria-hidden="true"></div>
     <div class="coordinate-grid" id="coordinate-grid" aria-hidden="true"></div>
     <div class="grid-controls">
       <output class="grid-coordinate" id="grid-coordinate" aria-live="polite">A–L · 1–12</output>

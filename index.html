@@ -18,6 +18,16 @@
       /* Requested font */
       body { font-family: "Barlow Condensed", sans-serif; }
       body { position: relative; min-height: 100svh; }
+      .page-layout {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        min-height: 100svh;
+      }
+      .dashboard {
+        grid-column: 1 / 4;
+        background: #333333;
+        color: #ffffff;
+      }
       .coordinate-grid {
         position: absolute;
         inset: 0;
@@ -82,7 +92,11 @@
     </style>
   </head>
   <body>
-    <h1>color theory</h1>
+    <div class="page-layout">
+      <aside class="dashboard" aria-label="Dashboard">
+        <h1>color theory</h1>
+      </aside>
+    </div>
     <div class="coordinate-grid" id="coordinate-grid" aria-hidden="true"></div>
     <div class="grid-controls">
       <output class="grid-coordinate" id="grid-coordinate" aria-live="polite">A–L · 1–12</output>

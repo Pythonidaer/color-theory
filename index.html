@@ -17,9 +17,103 @@
       h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
       /* Requested font */
       body { font-family: "Barlow Condensed", sans-serif; }
+      body { position: relative; min-height: 100svh; }
+      .coordinate-grid {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-template-rows: repeat(12, minmax(0, 1fr));
+        border-top: 2px dotted #001f54;
+        border-left: 2px dotted #001f54;
+        color: #001f54;
+      }
+      .coordinate-grid[hidden] { display: none; }
+      .grid-cell {
+        display: flex;
+        align-items: flex-end;
+        justify-content: flex-end;
+        min-width: 0;
+        min-height: 0;
+        border-right: 2px dotted #001f54;
+        border-bottom: 2px dotted #001f54;
+        padding: 2px 4px;
+        font-size: clamp(12px, 1.1vw, 16px);
+        line-height: 1;
+      }
+      .grid-cell.is-selected { background: rgb(0 31 84 / 9%); }
+      .grid-controls {
+        position: absolute;
+        right: max(16px, env(safe-area-inset-right));
+        bottom: max(16px, env(safe-area-inset-bottom));
+        display: flex;
+        align-items: flex-end;
+        flex-direction: column;
+        gap: 8px;
+        color: #001f54;
+      }
+      .grid-coordinate {
+        background: #fff;
+        padding: 2px 8px;
+        font-size: 20px;
+      }
+      .grid-toggle {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 52px;
+        padding: 8px 16px;
+        border: 1px solid #001f54;
+        border-radius: 6px;
+        color: #001f54;
+        background: #fff;
+        font-size: 26px;
+        cursor: pointer;
+      }
+      .grid-toggle::after {
+        content: "";
+        width: 12px;
+        height: 12px;
+        border: 1px solid currentColor;
+        border-radius: 50%;
+      }
+      .grid-toggle[aria-pressed="true"]::after { background: currentColor; }
+      .grid-toggle:focus-visible { outline: 3px solid #001f54; outline-offset: 4px; }
     </style>
   </head>
   <body>
     <h1>color theory</h1>
+    <div class="coordinate-grid" id="coordinate-grid" aria-hidden="true"></div>
+    <div class="grid-controls">
+      <output class="grid-coordinate" id="grid-coordinate" aria-live="polite">A–L · 1–12</output>
+      <button class="grid-toggle" type="button" aria-pressed="true" aria-controls="coordinate-grid">grid</button>
+    </div>
+    <script>
+      const grid = document.querySelector('#coordinate-grid');
+      const toggle = document.querySelector('.grid-toggle');
+      const coordinate = document.querySelector('#grid-coordinate');
+      const columns = 'ABCDEFGHIJKL';
+      for (let row = 1; row <= 12; row++) {
+        for (const column of columns) {
+          const cell = document.createElement('div');
+          cell.className = 'grid-cell';
+          cell.textContent = `${column}${row}`;
+          grid.append(cell);
+        }
+      }
+      grid.addEventListener('pointerdown', (event) => {
+        const cell = event.target.closest('.grid-cell');
+        if (!cell) return;
+        grid.querySelector('.is-selected')?.classList.remove('is-selected');
+        cell.classList.add('is-selected');
+        coordinate.textContent = cell.textContent;
+      });
+      toggle.addEventListener('click', () => {
+        const visible = toggle.getAttribute('aria-pressed') !== 'true';
+        toggle.setAttribute('aria-pressed', String(visible));
+        grid.hidden = !visible;
+        coordinate.hidden = !visible;
+      });
+    </script>
   </body>
 </html>

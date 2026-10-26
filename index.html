@@ -57,12 +57,12 @@
       }
       .workspace-toolbar {
         grid-column: 7 / 24;
-        grid-row: 2 / 3;
+        grid-row: 3 / 4;
         background: #f5f2eb;
       }
       .workspace {
         grid-column: 7 / 24;
-        grid-row: 3 / 24;
+        grid-row: 4 / 24;
         min-width: 0;
         min-height: 0;
         overflow: auto;
@@ -79,7 +79,7 @@
         right: 0;
         height: calc(100% / 24);
       }
-      .frame-top { top: 0; }
+      .frame-top { top: 0; height: calc(100% / 12); }
       .frame-bottom { bottom: 0; }
       .frame-right {
         top: 0;
@@ -158,9 +158,17 @@
         <ol class="dashboard-placeholders" aria-label="Dashboard placeholders">
           <li><span id="upload-typography-label">Upload Typography</span></li>
           <li><span id="font-count-label">Font Count</span></li>
-          <li>
-            <div>
-              <label for="scale-ratio" id="scale-ratio-label">Modular Scale</label>
+          <li><a id="modular-scale-link" href="#modular-scale">Modular Scale</a></li>
+          <li><span id="placeholder-4">4</span></li>
+          <li><span id="placeholder-5">5</span></li>
+          <li><span id="placeholder-6">6</span></li>
+          <li><span id="placeholder-7">7</span></li>
+          <li><a id="role-scaling-link" href="#role-scaling">Role Scaling</a></li>
+        </ol>
+      </aside>
+      <div class="workspace-toolbar">
+        <div id="scale-controls" hidden>
+          <label for="scale-ratio" id="scale-ratio-label">Modular Scale</label>
               <select id="scale-ratio">
                 <option value="none" selected>None</option>
                 <option value="minor-second">Minor second · 1.067</option>
@@ -177,17 +185,7 @@
                 <option value="major-seventh">Major seventh · 1.875</option>
                 <option value="octave">Octave · 2</option>
               </select>
-            </div>
-          </li>
-          <li><span id="placeholder-4">4</span></li>
-          <li><span id="placeholder-5">5</span></li>
-          <li><span id="placeholder-6">6</span></li>
-          <li><span id="placeholder-7">7</span></li>
-          <li><a id="role-scaling-link" href="#role-scaling">Role Scaling</a></li>
-        </ol>
-      </aside>
-      <div class="workspace-toolbar">
-        <label><input type="checkbox" id="scale-view-toggle" aria-controls="typography-view role-scaling"> <span id="scale-view-label">Modular Scale</span></label>
+        </div>
       </div>
       <main class="workspace" aria-label="Color workspace">
         <section id="typography-view" aria-label="Typography preview">
@@ -267,7 +265,8 @@
         'octave': 2,
       };
       const ratioSelect = document.querySelector('#scale-ratio');
-      const scaleViewToggle = document.querySelector('#scale-view-toggle');
+      const modularScaleLink = document.querySelector('#modular-scale-link');
+      const scaleControls = document.querySelector('#scale-controls');
       const fontSpecimen = document.querySelector('#font-specimen');
       const scalePreview = document.querySelector('#scale-preview');
       const typographyView = document.querySelector('#typography-view');
@@ -279,14 +278,14 @@
         ['logo', 'DESIGN VAULT logo'],
         ['upload-typography-label', 'Upload Typography'],
         ['font-count-label', 'Font Count'],
-        ['scale-ratio-label', 'Modular Scale menu label'],
+        ['modular-scale-link', 'Modular Scale menu link'],
+        ['scale-ratio-label', 'Modular Scale toolbar label'],
         ['scale-ratio', 'Modular Scale dropdown'],
         ['placeholder-4', 'Menu item 4'],
         ['placeholder-5', 'Menu item 5'],
         ['placeholder-6', 'Menu item 6'],
         ['placeholder-7', 'Menu item 7'],
         ['role-scaling-link', 'Role Scaling link'],
-        ['scale-view-label', 'Modular Scale toggle label'],
       ];
       function applyRoleSize(id) {
         const element = document.getElementById(id);
@@ -331,6 +330,13 @@
       }
       function renderViews() {
         const showRoles = location.hash === '#role-scaling';
+        const showScale = location.hash === '#modular-scale';
+        scaleControls.hidden = !showScale;
+        document.querySelector('#chosen-font').hidden = showScale;
+        fontSpecimen.hidden = showScale;
+        scalePreview.hidden = !showScale;
+        if (showScale) modularScaleLink.setAttribute('aria-current', 'page');
+        else modularScaleLink.removeAttribute('aria-current');
         roleScalingView.hidden = !showRoles;
         typographyView.hidden = showRoles;
         if (showRoles) roleScalingLink.setAttribute('aria-current', 'page');
@@ -338,9 +344,6 @@
         document.querySelector('.workspace').scrollTo(0, 0);
       }
       function renderScale() {
-        document.querySelector('#chosen-font').hidden = scaleViewToggle.checked;
-        fontSpecimen.hidden = scaleViewToggle.checked;
-        scalePreview.hidden = !scaleViewToggle.checked;
         scalePreview.replaceChildren();
         const ratio = scaleRatios[ratioSelect.value];
         const steps = ratio ? scaleSteps : [0];
@@ -356,20 +359,17 @@
         }
         document.querySelector('.workspace').scrollTo(0, 0);
       }
-      roleScalingLink.addEventListener('click', (event) => {
-        event.preventDefault();
-        if (location.hash !== '#role-scaling') history.pushState(null, '', '#role-scaling');
-        renderViews();
-      });
+      for (const [link, hash] of [[roleScalingLink, '#role-scaling'], [modularScaleLink, '#modular-scale']]) {
+        link.addEventListener('click', (event) => {
+          event.preventDefault();
+          if (location.hash !== hash) history.pushState(null, '', hash);
+          renderViews();
+        });
+      }
       window.addEventListener('hashchange', renderViews);
       ratioSelect.addEventListener('change', () => {
         renderScale();
         renderRoleScaling();
-      });
-      scaleViewToggle.addEventListener('change', () => {
-        history.replaceState(null, '', location.pathname + location.search);
-        renderScale();
-        renderViews();
       });
       renderScale();
       renderRoleScaling();

@@ -154,13 +154,13 @@
   <body>
     <div class="page-layout">
       <aside class="dashboard" aria-label="Dashboard">
-        <h1 class="logo">DESIGN VAULT</h1>
+        <h1 class="logo" id="logo">DESIGN VAULT</h1>
         <ol class="dashboard-placeholders" aria-label="Dashboard placeholders">
-          <li>Upload Typography</li>
-          <li>Font Count</li>
+          <li><span id="upload-typography-label">Upload Typography</span></li>
+          <li><span id="font-count-label">Font Count</span></li>
           <li>
             <div>
-              <label for="scale-ratio">Modular Scale</label>
+              <label for="scale-ratio" id="scale-ratio-label">Modular Scale</label>
               <select id="scale-ratio">
                 <option value="none" selected>None</option>
                 <option value="minor-second">Minor second · 1.067</option>
@@ -179,18 +179,18 @@
               </select>
             </div>
           </li>
-          <li>4</li>
-          <li>5</li>
-          <li>6</li>
-          <li>7</li>
-          <li>8</li>
+          <li><span id="placeholder-4">4</span></li>
+          <li><span id="placeholder-5">5</span></li>
+          <li><span id="placeholder-6">6</span></li>
+          <li><span id="placeholder-7">7</span></li>
+          <li><a id="role-scaling-link" href="#role-scaling">Role Scaling</a></li>
         </ol>
       </aside>
       <div class="workspace-toolbar">
-        <label><input type="checkbox" id="scale-view-toggle" aria-controls="font-specimen scale-preview"> Modular Scale</label>
+        <label><input type="checkbox" id="scale-view-toggle" aria-controls="typography-view role-scaling"> <span id="scale-view-label">Modular Scale</span></label>
       </div>
       <main class="workspace" aria-label="Color workspace">
-        <section aria-label="Typography preview">
+        <section id="typography-view" aria-label="Typography preview">
           <h2 id="chosen-font">Barlow Condensed</h2>
           <div id="font-specimen">
           <p>ABCDEFGHIJKLMNOPQRSTUVWXYZ</p>
@@ -200,6 +200,15 @@
           <p>@ # &amp; * / \ | _ + − = &lt; &gt; % $ £ € © ® ™</p>
           </div>
           <div id="scale-preview" hidden></div>
+        </section>
+        <section id="role-scaling" aria-label="Role Scaling" hidden>
+          <table>
+            <thead>
+              <tr><th id="role-scale-heading" colspan="2">None</th></tr>
+              <tr><th scope="col">Element</th><th scope="col">Font size</th></tr>
+            </thead>
+            <tbody id="role-scaling-rows"></tbody>
+          </table>
         </section>
       </main>
     </div>
@@ -225,7 +234,7 @@
         }
       }
       document.addEventListener('pointerdown', (event) => {
-        if (grid.hidden || event.target.closest('button, input, select, label')) return;
+        if (grid.hidden || event.target.closest('a, button, input, select, label')) return;
         const bounds = grid.getBoundingClientRect();
         if (event.clientX < bounds.left || event.clientX >= bounds.right ||
             event.clientY < bounds.top || event.clientY >= bounds.bottom) return;
@@ -261,13 +270,80 @@
       const scaleViewToggle = document.querySelector('#scale-view-toggle');
       const fontSpecimen = document.querySelector('#font-specimen');
       const scalePreview = document.querySelector('#scale-preview');
+      const typographyView = document.querySelector('#typography-view');
+      const roleScalingView = document.querySelector('#role-scaling');
+      const roleScalingLink = document.querySelector('#role-scaling-link');
+      const scaleSteps = [6, 5, 4, 3, 2, 1, 0, -1, -2];
+      const roleChoices = new Map();
+      const roles = [
+        ['logo', 'DESIGN VAULT logo'],
+        ['upload-typography-label', 'Upload Typography'],
+        ['font-count-label', 'Font Count'],
+        ['scale-ratio-label', 'Modular Scale menu label'],
+        ['scale-ratio', 'Modular Scale dropdown'],
+        ['placeholder-4', 'Menu item 4'],
+        ['placeholder-5', 'Menu item 5'],
+        ['placeholder-6', 'Menu item 6'],
+        ['placeholder-7', 'Menu item 7'],
+        ['role-scaling-link', 'Role Scaling link'],
+        ['scale-view-label', 'Modular Scale toggle label'],
+      ];
+      function applyRoleSize(id) {
+        const element = document.getElementById(id);
+        const step = roleChoices.get(id);
+        if (step === undefined || step === '') {
+          element.style.removeProperty('font-size');
+          return;
+        }
+        const ratio = scaleRatios[ratioSelect.value] ?? 1;
+        element.style.fontSize = `${ratio ** Number(step)}rem`;
+      }
+      function renderRoleScaling() {
+        document.querySelector('#role-scale-heading').textContent =
+          ratioSelect.selectedOptions[0].textContent.replace(' · ', ' - ');
+        const rows = document.querySelector('#role-scaling-rows');
+        rows.replaceChildren();
+        const ratio = scaleRatios[ratioSelect.value];
+        for (const [id, name] of roles) {
+          applyRoleSize(id);
+          const row = document.createElement('tr');
+          const elementCell = document.createElement('td');
+          const sizeCell = document.createElement('td');
+          const select = document.createElement('select');
+          select.setAttribute('aria-label', `${name} font size`);
+          select.dataset.role = id;
+          select.add(new Option('Default (1rem)', ''));
+          for (const step of ratio ? scaleSteps : [0]) {
+            const size = ratio ? ratio ** step : 1;
+            select.add(new Option(`${Number(size.toFixed(3))}rem`, String(step)));
+          }
+          select.value = roleChoices.get(id) ?? '';
+          if (select.selectedIndex === -1) select.value = '';
+          select.addEventListener('change', () => {
+            roleChoices.set(id, select.value);
+            applyRoleSize(id);
+          });
+          elementCell.textContent = name;
+          sizeCell.append(select);
+          row.append(elementCell, sizeCell);
+          rows.append(row);
+        }
+      }
+      function renderViews() {
+        const showRoles = location.hash === '#role-scaling';
+        roleScalingView.hidden = !showRoles;
+        typographyView.hidden = showRoles;
+        if (showRoles) roleScalingLink.setAttribute('aria-current', 'page');
+        else roleScalingLink.removeAttribute('aria-current');
+        document.querySelector('.workspace').scrollTo(0, 0);
+      }
       function renderScale() {
         document.querySelector('#chosen-font').hidden = scaleViewToggle.checked;
         fontSpecimen.hidden = scaleViewToggle.checked;
         scalePreview.hidden = !scaleViewToggle.checked;
         scalePreview.replaceChildren();
         const ratio = scaleRatios[ratioSelect.value];
-        const steps = ratio ? [6, 5, 4, 3, 2, 1, 0, -1, -2] : [0];
+        const steps = ratio ? scaleSteps : [0];
         for (const step of steps) {
           const size = ratio ? ratio ** step : 1;
           const row = document.createElement('div');
@@ -280,9 +356,24 @@
         }
         document.querySelector('.workspace').scrollTo(0, 0);
       }
-      ratioSelect.addEventListener('change', renderScale);
-      scaleViewToggle.addEventListener('change', renderScale);
+      roleScalingLink.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (location.hash !== '#role-scaling') history.pushState(null, '', '#role-scaling');
+        renderViews();
+      });
+      window.addEventListener('hashchange', renderViews);
+      ratioSelect.addEventListener('change', () => {
+        renderScale();
+        renderRoleScaling();
+      });
+      scaleViewToggle.addEventListener('change', () => {
+        history.replaceState(null, '', location.pathname + location.search);
+        renderScale();
+        renderViews();
+      });
       renderScale();
+      renderRoleScaling();
+      renderViews();
     </script>
   </body>
 </html>

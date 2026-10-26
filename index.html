@@ -190,7 +190,7 @@
         <label><input type="checkbox" id="scale-view-toggle" aria-controls="font-specimen scale-preview"> Modular Scale</label>
       </div>
       <main class="workspace" aria-label="Color workspace">
-        <section aria-labelledby="chosen-font">
+        <section aria-label="Typography preview">
           <h2 id="chosen-font">Barlow Condensed</h2>
           <div id="font-specimen">
           <p>ABCDEFGHIJKLMNOPQRSTUVWXYZ</p>
@@ -262,6 +262,7 @@
       const fontSpecimen = document.querySelector('#font-specimen');
       const scalePreview = document.querySelector('#scale-preview');
       function renderScale() {
+        document.querySelector('#chosen-font').hidden = scaleViewToggle.checked;
         fontSpecimen.hidden = scaleViewToggle.checked;
         scalePreview.hidden = !scaleViewToggle.checked;
         scalePreview.replaceChildren();
@@ -270,13 +271,11 @@
         for (const step of steps) {
           const size = ratio ? ratio ** step : 1;
           const row = document.createElement('div');
-          const sizeLabel = document.createElement('p');
-          sizeLabel.textContent = `${Number(size.toFixed(3))}rem`;
           const alphabet = document.createElement('p');
           alphabet.className = 'scale-alphabet';
           alphabet.style.fontSize = `${size}rem`;
           alphabet.textContent = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-          row.append(sizeLabel, alphabet);
+          row.append(alphabet);
           scalePreview.append(row);
         }
         document.querySelector('.workspace').scrollTo(0, 0);

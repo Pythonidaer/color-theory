@@ -16,13 +16,14 @@
       input, button, textarea, select { font: inherit; }
       h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
       /* Requested font */
-      body { font-family: "Barlow Condensed", sans-serif; }
+      body { font-family: "Barlow Condensed", sans-serif; font-size: 1rem; }
       body { position: relative; min-height: 100svh; }
       .page-layout {
         display: grid;
         /* Two tracks per coordinate cell allow exact half-cell edges. */
         grid-template-columns: repeat(24, minmax(0, 1fr));
         grid-template-rows: repeat(24, minmax(0, 1fr));
+        height: 100svh;
         min-height: 100svh;
         background: #333333;
       }
@@ -63,8 +64,11 @@
         grid-column: 7 / 24;
         grid-row: 3 / 24;
         min-width: 0;
+        min-height: 0;
+        overflow: auto;
         background: #ffffff;
       }
+      .scale-alphabet { white-space: nowrap; }
       .frame-edge {
         position: absolute;
         background: #333333;
@@ -84,6 +88,7 @@
         width: calc(100% / 24);
       }
       .coordinate-grid {
+        pointer-events: none;
         position: absolute;
         inset: 0;
         display: grid;
@@ -151,9 +156,29 @@
       <aside class="dashboard" aria-label="Dashboard">
         <h1 class="logo">DESIGN VAULT</h1>
         <ol class="dashboard-placeholders" aria-label="Dashboard placeholders">
-          <li>1</li>
-          <li>2</li>
-          <li>3</li>
+          <li>Upload Typography</li>
+          <li>Font Count</li>
+          <li>
+            <div>
+              <label for="scale-ratio">Modular Scale</label>
+              <select id="scale-ratio">
+                <option value="none" selected>None</option>
+                <option value="minor-second">Minor second · 1.067</option>
+                <option value="major-second">Major second · 1.125</option>
+                <option value="minor-third">Minor third · 1.2</option>
+                <option value="major-third">Major third · 1.25</option>
+                <option value="perfect-fourth">Perfect fourth · 1.333</option>
+                <option value="augmented-fourth">Augmented fourth · 1.414</option>
+                <option value="perfect-fifth">Perfect fifth · 1.5</option>
+                <option value="minor-sixth">Minor sixth · 1.6</option>
+                <option value="golden-ratio">Golden ratio · 1.618</option>
+                <option value="major-sixth">Major sixth · 1.667</option>
+                <option value="minor-seventh">Minor seventh · 1.778</option>
+                <option value="major-seventh">Major seventh · 1.875</option>
+                <option value="octave">Octave · 2</option>
+              </select>
+            </div>
+          </li>
           <li>4</li>
           <li>5</li>
           <li>6</li>
@@ -161,15 +186,20 @@
           <li>8</li>
         </ol>
       </aside>
-      <div class="workspace-toolbar" aria-hidden="true"></div>
+      <div class="workspace-toolbar">
+        <label><input type="checkbox" id="scale-view-toggle" aria-controls="font-specimen scale-preview"> Modular Scale</label>
+      </div>
       <main class="workspace" aria-label="Color workspace">
         <section aria-labelledby="chosen-font">
           <h2 id="chosen-font">Barlow Condensed</h2>
+          <div id="font-specimen">
           <p>ABCDEFGHIJKLMNOPQRSTUVWXYZ</p>
           <p>abcdefghijklmnopqrstuvwxyz</p>
           <p>0123456789</p>
           <p>.,:;!? ' &quot; ‘ ’ “ ” … - – — ( ) [ ] { }</p>
           <p>@ # &amp; * / \ | _ + − = &lt; &gt; % $ £ € © ® ™</p>
+          </div>
+          <div id="scale-preview" hidden></div>
         </section>
       </main>
     </div>
@@ -194,9 +224,14 @@
           grid.append(cell);
         }
       }
-      grid.addEventListener('pointerdown', (event) => {
-        const cell = event.target.closest('.grid-cell');
-        if (!cell) return;
+      document.addEventListener('pointerdown', (event) => {
+        if (grid.hidden || event.target.closest('button, input, select, label')) return;
+        const bounds = grid.getBoundingClientRect();
+        if (event.clientX < bounds.left || event.clientX >= bounds.right ||
+            event.clientY < bounds.top || event.clientY >= bounds.bottom) return;
+        const column = Math.floor((event.clientX - bounds.left) / bounds.width * 12);
+        const row = Math.floor((event.clientY - bounds.top) / bounds.height * 12);
+        const cell = grid.children[row * 12 + column];
         grid.querySelector('.is-selected')?.classList.remove('is-selected');
         cell.classList.add('is-selected');
         coordinate.textContent = cell.textContent;
@@ -207,6 +242,48 @@
         grid.hidden = !visible;
         coordinate.hidden = !visible;
       });
+      const scaleRatios = {
+        'minor-second': 16 / 15,
+        'major-second': 9 / 8,
+        'minor-third': 6 / 5,
+        'major-third': 5 / 4,
+        'perfect-fourth': 4 / 3,
+        'augmented-fourth': Math.SQRT2,
+        'perfect-fifth': 3 / 2,
+        'minor-sixth': 8 / 5,
+        'golden-ratio': (1 + Math.sqrt(5)) / 2,
+        'major-sixth': 5 / 3,
+        'minor-seventh': 16 / 9,
+        'major-seventh': 15 / 8,
+        'octave': 2,
+      };
+      const ratioSelect = document.querySelector('#scale-ratio');
+      const scaleViewToggle = document.querySelector('#scale-view-toggle');
+      const fontSpecimen = document.querySelector('#font-specimen');
+      const scalePreview = document.querySelector('#scale-preview');
+      function renderScale() {
+        fontSpecimen.hidden = scaleViewToggle.checked;
+        scalePreview.hidden = !scaleViewToggle.checked;
+        scalePreview.replaceChildren();
+        const ratio = scaleRatios[ratioSelect.value];
+        const steps = ratio ? [6, 5, 4, 3, 2, 1, 0, -1, -2] : [0];
+        for (const step of steps) {
+          const size = ratio ? ratio ** step : 1;
+          const row = document.createElement('div');
+          const sizeLabel = document.createElement('p');
+          sizeLabel.textContent = `${Number(size.toFixed(3))}rem`;
+          const alphabet = document.createElement('p');
+          alphabet.className = 'scale-alphabet';
+          alphabet.style.fontSize = `${size}rem`;
+          alphabet.textContent = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+          row.append(sizeLabel, alphabet);
+          scalePreview.append(row);
+        }
+        document.querySelector('.workspace').scrollTo(0, 0);
+      }
+      ratioSelect.addEventListener('change', renderScale);
+      scaleViewToggle.addEventListener('change', renderScale);
+      renderScale();
     </script>
   </body>
 </html>

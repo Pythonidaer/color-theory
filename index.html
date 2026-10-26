@@ -20,13 +20,22 @@
       body { position: relative; min-height: 100svh; }
       .page-layout {
         display: grid;
-        grid-template-columns: repeat(12, minmax(0, 1fr));
+        /* Two tracks per coordinate cell allow exact half-cell edges. */
+        grid-template-columns: repeat(24, minmax(0, 1fr));
+        grid-template-rows: repeat(24, minmax(0, 1fr));
         min-height: 100svh;
+        background: #333333;
       }
       .dashboard {
-        grid-column: 1 / 4;
+        grid-column: 1 / 7;
+        grid-row: 1 / -1;
         background: #333333;
         color: #ffffff;
+      }
+      .workspace {
+        grid-column: 7 / 24;
+        grid-row: 2 / 24;
+        background: #ffffff;
       }
       .coordinate-grid {
         position: absolute;
@@ -96,6 +105,7 @@
       <aside class="dashboard" aria-label="Dashboard">
         <h1>color theory</h1>
       </aside>
+      <main class="workspace" aria-label="Color workspace"></main>
     </div>
     <div class="coordinate-grid" id="coordinate-grid" aria-hidden="true"></div>
     <div class="grid-controls">

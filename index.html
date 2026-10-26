@@ -3,10 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>color theory</title>
+    <title>DESIGN VAULT</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400&family=Black+Ops+One&display=swap" rel="stylesheet">
     <style>
       /* CSS reset */
       *, *::before, *::after { box-sizing: border-box; }
@@ -32,9 +32,21 @@
         background: #333333;
         color: #ffffff;
       }
+      .logo {
+        display: grid;
+        place-items: center;
+        height: calc(100svh / 12);
+        text-align: center;
+        font-family: "Black Ops One", sans-serif;
+      }
+      .workspace-toolbar {
+        grid-column: 7 / 24;
+        grid-row: 2 / 3;
+        background: #f5f2eb;
+      }
       .workspace {
         grid-column: 7 / 24;
-        grid-row: 2 / 24;
+        grid-row: 3 / 24;
         min-width: 0;
         background: #ffffff;
       }
@@ -122,8 +134,9 @@
   <body>
     <div class="page-layout">
       <aside class="dashboard" aria-label="Dashboard">
-        <h1>color theory</h1>
+        <h1 class="logo">DESIGN VAULT</h1>
       </aside>
+      <div class="workspace-toolbar" aria-hidden="true"></div>
       <main class="workspace" aria-label="Color workspace">
         <section aria-labelledby="chosen-font">
           <h2 id="chosen-font">Barlow Condensed</h2>
@@ -132,7 +145,6 @@
           <p>0123456789</p>
           <p>.,:;!? ' &quot; ‘ ’ “ ” … - – — ( ) [ ] { }</p>
           <p>@ # &amp; * / \ | _ + − = &lt; &gt; % $ £ € © ® ™</p>
-          <p>The quick brown fox jumps over the lazy dog.</p>
         </section>
       </main>
     </div>

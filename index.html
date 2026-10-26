@@ -35,8 +35,26 @@
       .workspace {
         grid-column: 7 / 24;
         grid-row: 2 / 24;
+        min-width: 0;
+        padding: clamp(16px, 3vw, 48px);
         background: #ffffff;
+        color: #222222;
       }
+      .specimen-label { font-size: 18px; color: #555555; }
+      .specimen-title {
+        font-size: clamp(36px, 4.5vw, 64px);
+        line-height: 1.1;
+        margin-top: 4px;
+      }
+      .specimen-samples { margin-top: 32px; }
+      .specimen-samples > div + div { margin-top: 24px; }
+      .specimen-samples dt { font-size: 16px; color: #555555; }
+      .specimen-samples dd {
+        font-size: clamp(24px, 3vw, 42px);
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+      }
+      .specimen-samples .sample-sentence { font-size: clamp(22px, 2vw, 28px); }
       .frame-edge {
         position: absolute;
         background: #333333;
@@ -123,7 +141,38 @@
       <aside class="dashboard" aria-label="Dashboard">
         <h1>color theory</h1>
       </aside>
-      <main class="workspace" aria-label="Color workspace"></main>
+      <main class="workspace" aria-label="Color workspace">
+        <section aria-labelledby="chosen-font">
+          <p class="specimen-label">chosen font · regular 400</p>
+          <h2 class="specimen-title" id="chosen-font">Barlow Condensed</h2>
+          <dl class="specimen-samples">
+            <div>
+              <dt>uppercase</dt>
+              <dd>ABCDEFGHIJKLMNOPQRSTUVWXYZ</dd>
+            </div>
+            <div>
+              <dt>lowercase</dt>
+              <dd>abcdefghijklmnopqrstuvwxyz</dd>
+            </div>
+            <div>
+              <dt>numbers</dt>
+              <dd>0123456789</dd>
+            </div>
+            <div>
+              <dt>punctuation</dt>
+              <dd>.,:;!? ' &quot; ‘ ’ “ ” … - – — ( ) [ ] { }</dd>
+            </div>
+            <div>
+              <dt>symbols</dt>
+              <dd>@ # &amp; * / \ | _ + − = &lt; &gt; % $ £ € © ® ™</dd>
+            </div>
+            <div>
+              <dt>sample sentence</dt>
+              <dd class="sample-sentence">The quick brown fox jumps over the lazy dog.</dd>
+            </div>
+          </dl>
+        </section>
+      </main>
     </div>
     <div class="frame-edge frame-top" aria-hidden="true"></div>
     <div class="frame-edge frame-right" aria-hidden="true"></div>
